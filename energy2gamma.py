@@ -32,29 +32,27 @@ OUTPUTS
 
 # CONSTANTS
 
-# Electron mass in kilograms
-E_MASS_KG = 9.1094*10**-31
-# Proton mass in kilograms
-P_MASS_KG = 1.6726*10**-27
-# Speed of light [m/s]
-SPEED_OF_LIGHT = 2.9979*10**8
-# converts ergs to Joules
-ERGS_2_JOULES = 10**-7
-# converts keV to Joules
-KEV_2_JOULES = 1.6022*10**-16
+# Electron mass in grams
+E_MASS_G = 9.1094*10**-28
+# Proton mass in grams
+P_MASS_G = 1.6726*10**-24
+# Speed of light [cm/s]
+SPEED_OF_LIGHT = 2.9979*10**10
+# converts keV to ergs
+KEV_2_ERGS = 1.6022*10**-9
 
 def converting_energies(energy_type, energy_value):
     """
-    Converts energies from kev, mev, or ergs to joules
+    Converts energy value from kev, mev, or joules to ergs
     """
     if energy_type == 'ergs':
-        energy_value = energy_value*ERGS_2_JOULES
-    if energy_type == 'joules':
         energy_value = energy_value
+    if energy_type == 'joules':
+        energy_value = energy_value*10**-7
     if energy_type == 'mev':
-        energy_value == energy_value*10**3*KEV_2_JOULES
+        energy_value == energy_value*10**3*KEV_2_ERGS
     else:
-        energy_value = energy_value*KEV_2_JOULES
+        energy_value = energy_value*KEV_2_ERGS
     return energy_value
 
 def finding_gamma(energy_value, energy_type='kev', particle_type='electron', total_energy=True):
@@ -63,9 +61,9 @@ def finding_gamma(energy_value, energy_type='kev', particle_type='electron', tot
     """
     energy_value = converting_energies(energy_type, energy_value)
     if particle_type == 'proton':
-        mass = P_MASS_KG
+        mass = P_MASS_G
     else:
-        mass = E_MASS_KG
+        mass = E_MASS_G
 
     if total_energy:
         lorentz_gamma = energy_value/(mass*SPEED_OF_LIGHT**2)
