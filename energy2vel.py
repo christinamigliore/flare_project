@@ -28,7 +28,7 @@ INPUTS
 OUTPUTS
 -------
 	v_total: float
-		speed in (m/s)
+		speed in (cm/s)
 
 """
 import math
@@ -37,12 +37,12 @@ import energy2gamma as e
 
 # CONSTANTS
 
-# Electron mass in kilograms
-E_MASS_KG = 9.1094*10**-31
-# Proton mass in kilograms
-P_MASS_KG = 1.6726*10**-27
-# Speed of light [m/s]
-SPEED_OF_LIGHT = 2.9979*10**8
+# Electron mass in grams
+E_MASS_G = 9.1094*10**-28
+# Proton mass in grams
+P_MASS_G = 1.6726*10**-24
+# Speed of light [cm/s]
+SPEED_OF_LIGHT = 2.9979*10**10
 
 
 def energy2vel(energy_value, energy_type='kev', particle_type='electron', total_energy=True):
@@ -50,9 +50,9 @@ def energy2vel(energy_value, energy_type='kev', particle_type='electron', total_
     Calculates the velocity from the inputed energy
     """
     if particle_type == 'proton':
-        mass = P_MASS_KG
+        mass = P_MASS_G
     else:
-        mass = E_MASS_KG
+        mass = E_MASS_G
 
     rest_energy = mass*SPEED_OF_LIGHT**2
     lorentz_gamma = e.finding_gamma(energy_value, energy_type, particle_type, total_energy)
