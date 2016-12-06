@@ -29,6 +29,7 @@ OUTPUTS
 	lorentz_gamma: float
 		Dimensionless Lorentz gamma
 """
+import unittest
 
 # CONSTANTS
 
@@ -41,6 +42,7 @@ SPEED_OF_LIGHT = 2.9979*10**10
 # converts keV to ergs
 KEV_2_ERGS = 1.6022*10**-9
 
+
 def converting_energies(energy_type, energy_value):
     """
     Converts energy value from kev, mev, or joules to ergs
@@ -51,7 +53,7 @@ def converting_energies(energy_type, energy_value):
         energy_value = energy_value*10**-7
     if energy_type == 'mev':
         energy_value == energy_value*10**3*KEV_2_ERGS
-    else:
+    if energy_type == 'kev':
         energy_value = energy_value*KEV_2_ERGS
     return energy_value
 
@@ -70,3 +72,19 @@ def finding_gamma(energy_value, energy_type='kev', particle_type='electron', tot
     else:
         lorentz_gamma = energy_value/(mass*SPEED_OF_LIGHT**2) + 1
     return lorentz_gamma
+
+class Test_energy_2_gamma(unittest.TestCase):
+    def test_converting_energies(self):
+        self.assertEqual(converting_energies('kev', 600), 9.613200000000001e-7)
+        self.assertEqual(converting_energies('ergs', 9.6132e-7), 9.6132e-7)
+        self.assertEqual(converting_energies('joules', 9.61306e-14), 9.613059999999999e-21)
+        self.assertEqual(converting_energies('mev', 0.6), 9.613200000000001e-7)
+
+    def test_finding_gamma(self):
+        self.assertEqual(finding_gamma(600), 1.1742049878397725)
+        self.assertEqual(finding_gamma(600, 'kev', 'proton'), 0.0006395015494575886)
+        self.assertEqual(finding_gamma(600, 'kev', 'electron', False) 2.1742049878397722)
+        self.assertEqual(finding_gamma(600, 'kev', 'proton', False), 1.0006395015494576)
+
+if __name__ == '__main__':
+    unittest.main()
