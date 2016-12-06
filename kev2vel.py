@@ -1,14 +1,14 @@
 """
 PURPOSE
 -------
-	Calculate an electron's or particle's speed based on
+	Calculatek2 an electron's or particle's speed based on
 	its kinetic energy.
 
 INPUTS
 ------
 	energy_value: float
 		Particle (assumed to be an electron) energy
-		(assumed to be in keV and assumed to be the kinetic energy)
+		(I6n keV and assumed to be the kinetic energy)
 
 	particle_type: string
 		Used to finding the mass of the particle, can be proton or electron
@@ -20,6 +20,7 @@ OUTPUTS
 
 """
 import math
+import unittest
 
 # CONSTANTS
 
@@ -41,3 +42,11 @@ def kev_2_vel(energy_value, particle_type='electron'):
         mass = E_MASS_G
     v_total = math.sqrt((2*energy_value*KEV_2_ERGS)/mass)
     return v_total
+
+class Test_kev_2_vel(unittest.TestCase):
+    def test_kev2vel(self):
+        self.assertEqual(kev_2_vel(250), 29655037635.500153)
+        self.assertEqual(kev_2_vel(30, 'proton') 239738587.75334778)
+
+if __name__ == '__main__':
+    unittest.main()
