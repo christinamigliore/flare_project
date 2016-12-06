@@ -19,6 +19,8 @@ OUTPUTS
 	b_limit: float
 
 """
+import unittest
+
 import energy2vel as e
 
 # Electron mass in grams
@@ -50,5 +52,9 @@ def get_b_limit(energy_value, particle_type='proton'):
     b_limit = (2*E_CHARGE*E_CHARGE)/(mu_rm*v*v*psi_min)
     return b_limit
 
+class Test_get_blimit(unittest.TestCase):
+    def test_get_b_limit(self):
+        self.assertEqual(get_b_limit(600),  1.8004325017426443e-27)
 
-    
+if __name__ == '__main__':
+    unittest.main()
