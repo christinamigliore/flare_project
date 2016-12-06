@@ -32,6 +32,7 @@ OUTPUTS
 
 """
 import math
+import unittest
 
 import energy2gamma as e
 
@@ -44,7 +45,6 @@ P_MASS_G = 1.6726*10**-24
 # Speed of light [cm/s]
 SPEED_OF_LIGHT = 2.9979*10**10
 
-
 def energy2vel(energy_value, energy_type='kev', particle_type='electron', total_energy=True):
     """
     Calculates the velocity from the inputed energy
@@ -52,7 +52,7 @@ def energy2vel(energy_value, energy_type='kev', particle_type='electron', total_
     if particle_type == 'proton':
         mass = P_MASS_G
     else:
-        mass = E_MASS_G
+        mass = E_MASS_
 
     rest_energy = mass*SPEED_OF_LIGHT**2
     lorentz_gamma = e.finding_gamma(energy_value, energy_type, particle_type, total_energy)
@@ -70,3 +70,15 @@ def energy2vel(energy_value, energy_type='kev', particle_type='electron', total_
         else:
             v_total = SPEED_OF_LIGHT*((1-((energy_value/(rest_energy)+1)**(-2)))**(0.5))
     return v_total
+
+class Test_energy_2_gamma(unittest.TestCase):
+    def test_energy2vel(self):
+        self.assertEqual(energy2vel(600), 17695483468.69996)
+        self.assertEqual(energy2vel(700), 20489792344.582314)
+        self.assertEqual(energy2vel(700, 'kev', 'electron', False), 27179426697.076885)
+        self.assertEqual(energy2vel(600, 'kev', 'electron', False), 26619880387.886257)
+        self.assertEqual(energy2vel(600, 'kev', 'proton', False), 1072143558.0925685)
+        self.assertEqual(energy2vel(700, 'kev', 'proton', False), 1158047398.5777202)
+
+if __name__ == '__main__':
+    unittest.main()
