@@ -15,6 +15,8 @@ OUTPUTS
 	b_limit: float
 
 """
+import unittest
+
 #1 keV=1.602e-9 ergs
 # converts keV to ergs
 KEV_2_ERGS = 1.6022*10**-9
@@ -34,3 +36,10 @@ def get_b_crit(energy_value):
     
     b_crit = (E_CHARGE*E_CHARGE)/(energy_value*KEV_2_ERGS)
     return b_crit
+
+class Test_energy_2_gamma(unittest.TestCase):
+    def test_get_b_crit(self):
+        self.assertEqual(get_b_crit(600), 2.66966670827612e-32)
+
+if __name__ == '__main__':
+    unittest.main()
