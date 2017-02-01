@@ -29,7 +29,7 @@ import numpy as np
 def get_loop_cls(grid, inputted_parameter, roof=1e22):
     """
     Function takes the derivative for each value, checks
-    if it equals 0 then converts values into the
+    if it equals 0 or infitinty and converts values into the
     characteristic length scale
     """
     ngrid = len(grid)
