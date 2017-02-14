@@ -90,7 +90,7 @@ def finding_velocity_and_position(mass_of_particle, v_next, next_position, B_fie
     velocity_vector = velocity_vector.flatten()
     return velocity_vector, position_vector
 
-def equations_of_motion(v_init, B_field, length_of_grid=10, particle_type='electron'):
+def equations_of_motion(v_init, B_field, length_of_grid, particle_type='electron'):
     if particle_type == 'proton':
         mass_of_particle = P_MASS_G
     else:
@@ -118,7 +118,7 @@ def equations_of_motion(v_init, B_field, length_of_grid=10, particle_type='elect
 
     return particle_velocity, particle_position, x_array, y_array, z_array
 
-def plot_particle_motion(v_init, B_field):
+def plot_particle_motion(v_init, B_field, len_of_grid):
 	particle_velocity, particle_position, x_array, y_array, z_array = equations_of_motion(v_init, B_field)
 
 	mpl.rcParams['legend.fontsize'] = 10
@@ -126,6 +126,9 @@ def plot_particle_motion(v_init, B_field):
 	fig = plt.figure()
 	ax = fig.gca(projection='3d')
 	ax.plot(x_array, y_array, z_array, label='particle trajectory')
+        ax.set_xlim(0, length_of_grid)
+        ax.set_ylim(0, length_of_grid)
+        ax.set_zlim(0, length_of_grid)
 	ax.set_xlabel('x position')
 	ax.set_ylabel('y position')
 	ax.set_zlabel('z position')
