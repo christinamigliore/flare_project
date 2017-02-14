@@ -118,19 +118,21 @@ def equations_of_motion(v_init, B_field, length_of_grid, particle_type='electron
 
     return particle_velocity, particle_position, x_array, y_array, z_array
 
-def plot_particle_motion(v_init, B_field, len_of_grid):
-	particle_velocity, particle_position, x_array, y_array, z_array = equations_of_motion(v_init, B_field, len_of_grid)
+def plot_particle_motion(v_init, B_field, length_of_grid):
+    particle_velocity, particle_position, x_array, y_array, z_array = equations_of_motion(v_init, B_field, length_of_grid)
 
-	mpl.rcParams['legend.fontsize'] = 10
+    mpl.rcParams['legend.fontsize'] = 10
 
-	fig = plt.figure()
-	ax = fig.gca(projection='3d')
-	ax.plot(x_array, y_array, z_array, label='particle trajectory')
-        ax.set_xlim(0, len_of_grid)
-        ax.set_ylim(0, len_of_grid)
-        ax.set_zlim(0, len_of_grid)
-	ax.set_xlabel('x position')
-	ax.set_ylabel('y position')
-	ax.set_zlabel('z position')
-	ax.legend()
-	plt.show()
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+
+    ax.plot(x_array, y_array, z_array, label='particle trajectory')
+    ax.set_xlim(0, length_of_grid)
+    ax.set_ylim(0, length_of_grid)
+    ax.set_zlim(0, length_of_grid)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
+    ax.legend()
+
+    plt.show()
