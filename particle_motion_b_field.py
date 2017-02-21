@@ -134,6 +134,8 @@ def finding_velocity_and_position(mass_of_particle, v_next, next_position, B_fie
     ay = (ELECTRON_CHARGE/mass_of_particle)*(v_z*Bx - v_x*Bz)/SPEED_OF_LIGHT
     az = (ELECTRON_CHARGE/mass_of_particle)*(v_x*By - v_y*Bx)/SPEED_OF_LIGHT
 
+    time_step = time_step[1] - time_step[0]
+
     vx_final = v_x + ax*time_step
     vy_final = v_y + ay*time_step
     vz_final = v_z + az*time_step
