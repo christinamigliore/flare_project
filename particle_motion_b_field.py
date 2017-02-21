@@ -166,14 +166,15 @@ def equations_of_motion(v_init, B_field, length_of_grid, particle_type='electron
         mass_of_particle = P_MASS_G
     else:
         mass_of_particle = E_MASS_G
-
+        
+    time_step = 1/float(2*(v_init[0]))
+    characteristic_length = time_step*v_init[0]
+    length_of_grid = int(10*characteristic_length)  
+    
     particle_velocity = np.zeros((2*length_of_grid, 3))
     particle_velocity[0] = v_init
     particle_position = np.zeros((2*length_of_grid, 3))
-
-    grid_dimensions = np.arange(length_of_grid)
-    time_step = (grid_dimensions[1] - grid_dimensions[0])/float(2*(v_init[0]))
-
+    
     for i in range(0, 2*length_of_grid-1):
         new_time_step = [0+i, time_step+i]
         particle_velocity[i+1], particle_position[i+1] = finding_velocity_and_position(mass_of_particle, particle_velocity[i], particle_position[i], B_field, new_time_step)
@@ -185,8 +186,7 @@ def equations_of_motion(v_init, B_field, length_of_grid, particle_type='electron
     for i in range(0, len(particle_position)):
         x_array[i] = particle_position[i][0]
         y_array[i] = particle_position[i][1]
-        z_array[i] = particle_position[i][2] 
-
+        z_array[i] = particle_position[i][2]
     return particle_velocity, particle_position, x_array, y_array, z_array
 
 def plot_particle_motion(v_init, B_field, length_of_grid):
@@ -195,7 +195,7 @@ def plot_particle_motion(v_init, B_field, length_of_grid):
     different component position arrays and 3D plots them. The axis are
     set to the length of grid.  
     """
-    particle_velocity, particle_position, x_array, y_array, z_array = equations_of_motion(v_init, B_field, length_of_grid)
+    particle_velocity, particle_position, x_array, y_array, z_array = equations_of_motion(v_init, B_field)
 
     mpl.rcParams['legend.fontsize'] = 10
 
