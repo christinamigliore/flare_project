@@ -214,7 +214,6 @@ def plot_particle_motion(v_init, B_field, length_of_grid):
 class Test_finding_velocity_and_position(unittest.TestCase):
     def test_finding_velocity_and_position(self):
         self.assertEqual(finding_velocity_and_position(9.1094*10**-28, [100, 10, 30], [0, 0, 0], [0, 0, 10], [0, 0.5]), [100.293341481, 7.06658519396, 30], [50.2200061105, 2.79993889547, 15.0])
-        self.assertEqual(energy2vel(700), 20489792344.582314)
 
 if __name__ == '__main__':
     unittest.main()
