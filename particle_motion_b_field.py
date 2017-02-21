@@ -16,9 +16,6 @@ INPUTS
 	B_field: array
 		The uniform magnetic field. [Bx, By, Bz]
 
-	length_of_grid: integer
-		The width, height, length of the 3D grid box.
-
 	particle_type: string
 		Can be either proton or electron. Set to electron as default.
 		
@@ -41,6 +38,9 @@ OUTPUTS
 
     z_array: 1D array
         Array of all the z positions of the particle. 
+	
+    length_of_grid: integer
+    	The width, height, length of the 3D grid box.
 
 """
 import numpy as np
@@ -187,7 +187,7 @@ def equations_of_motion(v_init, B_field, length_of_grid, particle_type='electron
         x_array[i] = particle_position[i][0]
         y_array[i] = particle_position[i][1]
         z_array[i] = particle_position[i][2]
-    return particle_velocity, particle_position, x_array, y_array, z_array
+    return particle_velocity, particle_position, x_array, y_array, z_array, length_of_grid
 
 def plot_particle_motion(v_init, B_field, length_of_grid):
     """
@@ -195,7 +195,7 @@ def plot_particle_motion(v_init, B_field, length_of_grid):
     different component position arrays and 3D plots them. The axis are
     set to the length of grid.  
     """
-    particle_velocity, particle_position, x_array, y_array, z_array = equations_of_motion(v_init, B_field)
+    particle_velocity, particle_position, x_array, y_array, z_array, length_of_grid = equations_of_motion(v_init, B_field)
 
     mpl.rcParams['legend.fontsize'] = 10
 
