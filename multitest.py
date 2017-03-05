@@ -3,11 +3,11 @@ DOCUMENTATION
 
 PURPOSE
 -------
-	Calculates the position and velocity x, y, z components of
+    Calculates the position and velocity x, y, z components of
     charged particles moving through a uniform B field using 
     the Lorentizan force and the kinematic equations of motion.
     Additionally 3D plots the trajectories of each particle
-    on the same plot. 
+    on the same plot. This is done through multiprocessing.
 
 INPUTS
 ------
