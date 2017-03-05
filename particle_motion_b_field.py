@@ -3,15 +3,16 @@ DOCUMENTATION
 
 PURPOSE
 -------
-    Calculates the position and velocity x, y, z components of
-    a charged particle moving through a uniform B field using 
+	Calculates the position and velocity x, y, z components of
+    charged particles moving through a uniform B field using 
     the Lorentizan force and the kinematic equations of motion.
-    Additionally 3D plots the trajectory. 
+    Additionally 3D plots the trajectories of each particle
+    on the same plot. 
 
 INPUTS
 ------
-	v_init: array
-		The initial velocity of the particle. [Vx0, Vy0, Vz0]
+	v_init_list: array
+		The initial list of velocities for the particles. [[Vx10, Vy10, Vz10], ...]
 
 	B_field: array
 		The uniform magnetic field. [Bx, By, Bz]
@@ -38,18 +39,16 @@ OUTPUTS
 
     z_array: 1D array
         Array of all the z positions of the particle. 
-	
+
     length_of_grid: integer
-    	The width, height, length of the 3D grid box.
+        The width, height, length of the 3D grid box.
 
 """
 import numpy as np
 from scipy.integrate import odeint
-import matplotlib as mpl
-from mpl_toolkits.mplot3d import Axes3D
-import numpy as np
-import matplotlib.pyplot as plt
 import unittest
+
+import random_generator as rg
 
 # CONSTANTS
 # Electron mass in grams
@@ -116,7 +115,6 @@ def finding_velocity_and_position(mass_of_particle, v_next, next_position, B_fie
     position_vector = position_vector.flatten()
     velocity_vector = velocity_vector.flatten()
     return velocity_vector, position_vector
-
     """
     v_x = v_next[0]
     v_y = v_next[1]
@@ -134,6 +132,7 @@ def finding_velocity_and_position(mass_of_particle, v_next, next_position, B_fie
     ay = (ELECTRON_CHARGE/mass_of_particle)*(v_z*Bx - v_x*Bz)/SPEED_OF_LIGHT
     az = (ELECTRON_CHARGE/mass_of_particle)*(v_x*By - v_y*Bx)/SPEED_OF_LIGHT
 
+
     time_step = time_step[1] - time_step[0]
 
     vx_final = v_x + ax*time_step
@@ -142,7 +141,7 @@ def finding_velocity_and_position(mass_of_particle, v_next, next_position, B_fie
 
     x_final = p_x + v_x*time_step + (1/2)*ax*time_step**2
     y_final = p_y + v_y*time_step + (1/2)*ay*time_step**2
-    z_final = p_x + v_z*time_step + (1/2)*az*time_step**2
+    z_final = p_z + v_z*time_step + (1/2)*az*time_step**2
 
     position_vector = np.array([x_final, y_final, z_final])
     velocity_vector = np.array([vx_final, vy_final, vz_final])
@@ -150,7 +149,7 @@ def finding_velocity_and_position(mass_of_particle, v_next, next_position, B_fie
     velocity_vector = velocity_vector.flatten()
     return velocity_vector, position_vector
 
-def equations_of_motion(v_init, B_field, length_of_grid, particle_type='electron'):
+def equations_of_motion(v_init, p_init, B_field, particle_type='electron'):
     """
     This function takes in the initial velocity, the B field, and the length of the 
     grid as inputs. The function assigns a mass depending on the inputed particle 
@@ -169,53 +168,31 @@ def equations_of_motion(v_init, B_field, length_of_grid, particle_type='electron
         
     time_step = 1/float(2*(v_init[0]))
     characteristic_length = time_step*v_init[0]
-    length_of_grid = int(10*characteristic_length)  
+    length_of_grid = int(5000*characteristic_length)  
     
     particle_velocity = np.zeros((2*length_of_grid, 3))
     particle_velocity[0] = v_init
     particle_position = np.zeros((2*length_of_grid, 3))
+    particle_position[0] = p_init
     
     for i in range(0, 2*length_of_grid-1):
         new_time_step = [0+i, time_step+i]
         particle_velocity[i+1], particle_position[i+1] = finding_velocity_and_position(mass_of_particle, particle_velocity[i], particle_position[i], B_field, new_time_step)
 
-    x_array = np.zeros(len(particle_position))
-    y_array = np.zeros(len(particle_position))
-    z_array = np.zeros(len(particle_position))
-    
-    for i in range(0, len(particle_position)):
-        x_array[i] = particle_position[i][0]
-        y_array[i] = particle_position[i][1]
-        z_array[i] = particle_position[i][2]
-    return particle_velocity, particle_position, x_array, y_array, z_array, length_of_grid
+    return particle_velocity, particle_position, length_of_grid
 
-def plot_particle_motion(v_init, B_field, length_of_grid):
-    """
-    This function runs finding_velocity_and_position and returns the three
-    different component position arrays and 3D plots them. The axis are
-    set to the length of grid.  
-    """
-    particle_velocity, particle_position, x_array, y_array, z_array, length_of_grid = equations_of_motion(v_init, B_field)
-
-    mpl.rcParams['legend.fontsize'] = 10
-
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
-
-    ax.plot(x_array, y_array, z_array, label='particle trajectory')
-    ax.set_xlim(0, length_of_grid)
-    ax.set_ylim(0, length_of_grid)
-    ax.set_zlim(0, length_of_grid)
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z')
-    ax.legend()
-
-    plt.show()
-
+"""
+pos, vel = rg.get_particle_points(5)
+for i in range(0, len(vel)):
+    v_init = vel[i] 
+    p_init = pos[i] 
+    particle_velocity, particle_position, length_of_grid = equations_of_motion(v_init, p_init, [0, 0, 100], particle_type='electron')
+"""
+"""
 class Test_finding_velocity_and_position(unittest.TestCase):
     def test_finding_velocity_and_position(self):
         self.assertEqual(finding_velocity_and_position(9.1094*10**-28, [100, 10, 30], [0, 0, 0], [0, 0, 10], [0, 0.5]), [100.293341481, 7.06658519396, 30], [50.2200061105, 2.79993889547, 15.0])
 
 if __name__ == '__main__':
     unittest.main()
+"""
