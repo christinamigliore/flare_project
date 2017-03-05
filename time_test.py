@@ -4,8 +4,9 @@ DOCUMENTATION
 PURPOSE
 -------
     Time testing of the particle_motion_b_field. 
-    Calculates time between particle simulations 
-    then plots as a function of number of particles
+    Calculates time between particle simulations
+    for non parallel and parallel codes then 
+    plots as a function of number of particles
     and runtime.
 
 INPUTS
@@ -17,7 +18,11 @@ INPUTS
 OUTPUTS
 -------
     delta_time: list
-        List of runtimes for particle simulations
+        List of runtimes for particle simulations.
+	
+    delta_time_p: list
+        List of runtimes for particle simulations for
+	the parallel code.
 """
 num_of_particles = [10, 100, 1000, 2000, 5000]
 
