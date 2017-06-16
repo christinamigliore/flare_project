@@ -1,36 +1,27 @@
-"""
-DOCUMENTATION
-
-PURPOSE
--------
-	Calculates the characteristic length scale of the inputed grid
-	with the inputted parameter, (q).
-
-INPUTS
-------
-	grid: 1D array
-		grid values
-
-	inputted_parameter: 1D array
-		quantity values
-
-	roof: float, optionalg
-		maximum value
-		
-
-OUTPUTS
--------
-	c_ls: array
-		characteristic length scale of the grid
-
-"""
 import numpy as np
 
 def get_loop_cls(grid, inputted_parameter, roof=1e22):
     """
     Function takes the derivative for each value, checks
     if it equals 0 or infitinty and converts values into the
-    characteristic length scale
+    characteristic length scale. Calculates the characteristic 
+    length scale of the inputed grid with the inputted parameter, (q).
+
+    INPUTS
+    ------
+        grid: 1D array
+            grid values
+
+        inputted_parameter: 1D array
+            quantity values
+
+        roof: float (optional)
+            maximum value
+
+    OUTPUTS
+    -------
+        c_ls: array
+            characteristic length scale of the grid
     """
     ngrid = len(grid)
     dq = np.diff(inputted_parameter)
