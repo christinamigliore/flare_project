@@ -1,54 +1,18 @@
 """
-DOCUMENTATION
-
 PURPOSE
 -------
-	Calculates the position and velocity x, y, z components of
+    Calculates the position and velocity x, y, z components of
     charged particles moving through a uniform B field using 
     the Lorentizan force and the kinematic equations of motion.
     Additionally 3D plots the trajectories of each particle
     on the same plot. 
-
-INPUTS
-------
-	v_init_list: array
-		The initial list of velocities for the particles. [[Vx10, Vy10, Vz10], ...]
-
-	B_field: array
-		The uniform magnetic field. [Bx, By, Bz]
-
-	particle_type: string
-		Can be either proton or electron. Set to electron as default.
-		
-
-OUTPUTS
--------
-    particle_velocity: 2D array
-        Contains all the calculated final velocities, Vx, Vy and Vz, of the 
-        particle at each point.
-
-    particle_position: 2D array
-        Containes all the calculated final positions, x, y and z, of the
-        particle at each point.
-
-    x_array: 1D array
-        Array of all the x positions of the particle. 
-
-    y_array: 1D array
-        Array of all the y positions of the particle.
-
-    z_array: 1D array
-        Array of all the z positions of the particle. 
-
-    length_of_grid: integer
-        The width, height, length of the 3D grid box.
-
 """
 import numpy as np
-from scipy.integrate import odeint
 import unittest
 
 import random_generator as rg
+import stats
+import velocity_particles as vp
 
 # CONSTANTS
 # Electron mass in grams
@@ -62,59 +26,39 @@ ELECTRON_CHARGE = 1.6021766208 * 10**-19
 
 def finding_velocity_and_position(mass_of_particle, v_next, next_position, B_field, time_step):
     """
-    Function takes in the mass of particle, the initial velocity, the initial position, 
-    the B field, and the calculated time step from the equations_of_motion function. It defines
-    new variables for each x, y, z components of these inputs and calculates the lorentzian 
-    acceleration. This acceleration is then plugged into the kinetic equations of motion
-    to obtain the final velocity and position. The x, y, z velocities and positions are then
-    each converted into an array. 
-    """
-    """
-    v_x = v_next[0]
-    v_y = v_next[1]
-    v_z = v_next[2]
-    
-    Bx = B_field[0]
-    By = B_field[1]
-    Bz = B_field[2]
-    
-    p_x = next_position[0]
-    p_y = next_position[1]
-    p_z = next_position[2]
-    
-    def dvx_dt(vx, t):
-        vx = (ELECTRON_CHARGE/mass_of_particle)*(v_y*Bz - v_z*By)/SPEED_OF_LIGHT
-        return vx    
-    def dvy_dt(vy, t):
-        vy = (ELECTRON_CHARGE/mass_of_particle)*(v_z*Bx - v_x*Bz)/SPEED_OF_LIGHT
-        return vy  
-    def dvz_dt(vz, t):
-        vz = (ELECTRON_CHARGE/mass_of_particle)*(v_x*By - v_y*Bx)/SPEED_OF_LIGHT
-        return vz
-    
-    velocity_x = odeint(dvx_dt, v_x, time_step)
-    velocity_y = odeint(dvy_dt, v_y, time_step)
-    velocity_z = odeint(dvz_dt, v_z, time_step)
-    
-    def dx_dt(x, t):
-        x = velocity_x[1]
-        return x    
-    def dy_dt(y, t):
-        y = velocity_y[1]
-        return y  
-    def dz_dt(z, t):
-        z = velocity_z[1]
-        return z
+    PURPOSE:
+    ---------
+	    Function takes in the mass of particle, the initial velocity, the initial position, 
+	    the B field, and the calculated time step from the equations_of_motion function. It defines
+	    new variables for each x, y, z components of these inputs and calculates the lorentzian 
+	    acceleration. This acceleration is then plugged into the kinetic equations of motion
+	    to obtain the final velocity and position. The x, y, z velocities and positions are then
+	    each converted into an array. 
 
-    position_x = odeint(dx_dt, p_x, time_step)
-    position_y = odeint(dy_dt, p_y, time_step)
-    position_z = odeint(dz_dt, p_z, time_step)
-    
-    position_vector = np.array([position_x[1], position_y[1], position_z[1]])
-    velocity_vector = np.array([velocity_x[1], velocity_y[1], velocity_z[1]])
-    position_vector = position_vector.flatten()
-    velocity_vector = velocity_vector.flatten()
-    return velocity_vector, position_vector
+	INPUTS:
+	-------
+		mass_of_particle: float
+			Mass of particle either electron or proton.
+
+		v_next: array
+			Array of the x, y, z velocity components of particle at one instance in time.
+
+		next_position: array
+			Array of the x, y, z position components of particle at one instance in time.
+
+		B_field: array
+			Array of the x, y, z magnetic field.
+
+		time_step: array
+			The time step for the area of the box. [start, end]
+
+	OUTPUTS:
+	--------
+		velocity_vector: array
+			Particle's next x, y, z velocity components
+
+		position_vector: array
+			Particle's next x, y, z position components
     """
     v_x = v_next[0]
     v_y = v_next[1]
@@ -151,16 +95,43 @@ def finding_velocity_and_position(mass_of_particle, v_next, next_position, B_fie
 
 def equations_of_motion(v_init, p_init, B_field, particle_type='electron'):
     """
-    This function takes in the initial velocity, the B field, and the length of the 
-    grid as inputs. The function assigns a mass depending on the inputed particle 
-    then creates an empty array that is twice as long as the length of the grid
-    for the velocity and position array. The function then calculates the time step
-    by taking the distance traveled and dividing by twice the initial velocity.
-    Using a loop, the code interates through 2*length of grid and defines a new time
-    step along with running the finding_velocity_and_position function for each 
-    point in the grid. The function then defines x_array, y_array, and z_array
-    in order to separate each of the position components in order to plot them.
-    """
+    PURPOSE:
+    --------
+	    This function takes in the initial velocity, the B field, and the length of the 
+	    grid as inputs. The function assigns a mass depending on the inputed particle 
+	    then creates an empty array that is twice as long as the length of the grid
+	    for the velocity and position array. The function then calculates the time step
+	    by taking the distance traveled and dividing by twice the initial velocity.
+	    Using a loop, the code interates through 2*length of grid and defines a new time
+	    step along with running the finding_velocity_and_position function for each 
+	    point in the grid. The function then defines x_array, y_array, and z_array
+	    in order to separate each of the position components in order to plot them.
+
+	INPUTS
+	------
+		v_init_list: array
+			The initial list of velocities for the particles. [[Vx10, Vy10, Vz10], ...]
+
+		B_field: array
+			The uniform magnetic field. [Bx, By, Bz]
+
+		particle_type: string (optional)
+			Can be either proton or electron. Set to electron as default.
+			
+
+	OUTPUTS
+	-------
+	    particle_velocity: 2D array
+	        Contains all the calculated final velocities, Vx, Vy and Vz, of the 
+	        particle at each point.
+
+	    particle_position: 2D array
+	        Containes all the calculated final positions, x, y and z, of the
+	        particle at each point.
+
+	    length_of_grid: integer
+	        The width, height, length of the 3D grid box.
+	"""
     if particle_type == 'proton':
         mass_of_particle = P_MASS_G
     else:
@@ -181,13 +152,42 @@ def equations_of_motion(v_init, p_init, B_field, particle_type='electron'):
 
     return particle_velocity, particle_position, length_of_grid
 
-"""
-pos, vel = rg.get_particle_points(5)
-for i in range(0, len(vel)):
-    v_init = vel[i] 
-    p_init = pos[i] 
-    particle_velocity, particle_position, length_of_grid = equations_of_motion(v_init, p_init, [0, 0, 100], particle_type='electron')
-"""
+def run_particles(num_samples, B_field):
+	"""
+	PURPOSE:
+	--------
+		This functions runs the position and velocity analysis and
+		returns the positions and velocities for the user inputted 
+		number of particles.
+
+	INPUTS:
+	-------
+		num_samples: integer
+			Number of particles to simulate
+
+		B_field: array
+            The uniform magnetic field. [Bx, By, Bz]
+
+	OUTPUTS:
+	--------
+		particle_velocities: list
+			List of all the positions for the simluated particles
+
+		particle_positions: list
+			List of all the velocities for the simulated particles 
+	"""
+	x_vals = stats.sample_cdf(particle_num)
+    vel = vp.get_vx_vy_vz(x_vals, len(x_vals))
+    pos = rg.get_random_points(len(x_vals), 0, 1, 3)
+	particle_velocities = []
+	particle_positions = []
+	for i in range(0, len(vel)):
+		v_init = vel[i] 
+		p_init = pos[i] 
+		particle_velocity, particle_position, length_of_grid = equations_of_motion(v_init, p_init, B_field, particle_type='electron')
+		particle_velocities.append(particle_velocity)
+		particle_positions.append(particle_position)
+	return particle_velocities, particle_positions
 """
 class Test_finding_velocity_and_position(unittest.TestCase):
     def test_finding_velocity_and_position(self):
