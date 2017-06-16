@@ -1,34 +1,3 @@
-"""
-PURPOSE
--------
-	Given the energy of a particle, determine the Lorentz gamma
-
-INPUTS
-------
-	energy_value: float
-		Particle (assumed to be an electron) energy
-		(assumed to be in keV and assumed to be the kinetic energy)
-
-	energy_type: string, optional
-		Options: kev, mev joules, ergs
-		Converts energy into joules
-		(If not specified, the energy type is set to kev)
-
-	particle_type: string, optional
-		Used to finding the mass of the particle, can be proton or electron
-		(If not specified, the mass is set to the mass of an electron)
-
-	total_energy: boolean, optional
-		True if the input was the total energy of the particle
-        not just the kinetic energy
-        (If not specified, set to True)
-
-
-OUTPUTS
--------
-	lorentz_gamma: float
-		Dimensionless Lorentz gamma
-"""
 import unittest
 
 # CONSTANTS
@@ -43,9 +12,26 @@ SPEED_OF_LIGHT = 2.9979*10**10
 KEV_2_ERGS = 1.6022*10**-9
 
 
-def converting_energies(energy_type, energy_value):
+def converting_energies(energy_value, energy_type):
     """
-    Converts energy value from kev, mev, or joules to ergs
+    PURPOSE:
+    --------
+        Function converts energy value from kev, mev, or joules to ergs.
+
+    INPUTS
+    ------
+        energy_value: float
+            Particle (assumed to be an electron) energy
+            (assumed to be in keV and assumed to be the kinetic energy)
+
+        energy_type: string, optional
+            Options: kev, mev joules, ergs
+            Converts energy into joules
+            (If not specified, the energy type is set to kev)
+    OUTPUTS:
+    -------
+        energy_value: float
+            The particle's converted energy value
     """
     if energy_type == 'ergs':
         energy_value = energy_value
@@ -59,7 +45,34 @@ def converting_energies(energy_type, energy_value):
 
 def finding_gamma(energy_value, energy_type='kev', particle_type='electron', total_energy=True):
     """
-    Calculates the lorentz gamma using inputed energy
+    PURPOSE:
+    --------
+        Function calculates the lorentz gamma using inputed energy.
+
+    INPUTS:
+    -------
+        energy_value: float
+            Particle (assumed to be an electron) energy
+            (assumed to be in keV and assumed to be the kinetic energy)
+
+        energy_type: string (optional)
+            Options: kev, mev joules, ergs
+            Converts energy into joules
+            (If not specified, the energy type is set to kev)
+
+        particle_type: string (optional)
+            Used to finding the mass of the particle, can be proton or electron
+            (If not specified, the mass is set to the mass of an electron)
+
+        total_energy: boolean (optional)
+            True if the input was the total energy of the particle
+            not just the kinetic energy
+            (If not specified, set to True)
+
+    OUTPUTS
+    -------
+        lorentz_gamma: float
+            Dimensionless Lorentz gamma
     """
     energy_value = converting_energies(energy_type, energy_value)
     if particle_type == 'proton':
@@ -83,7 +96,7 @@ class Test_energy_2_gamma(unittest.TestCase):
     def test_finding_gamma(self):
         self.assertEqual(finding_gamma(600), 1.1742049878397725)
         self.assertEqual(finding_gamma(600, 'kev', 'proton'), 0.0006395015494575886)
-        self.assertEqual(finding_gamma(600, 'kev', 'electron', False) 2.1742049878397722)
+        self.assertEqual(finding_gamma(600, 'kev', 'electron', False), 2.1742049878397722)
         self.assertEqual(finding_gamma(600, 'kev', 'proton', False), 1.0006395015494576)
 
 if __name__ == '__main__':
