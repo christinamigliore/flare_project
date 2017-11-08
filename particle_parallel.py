@@ -5,6 +5,7 @@ PURPOSE
     charged particles moving through a B field and E field using 
     the Lorentizan force and the kinematic equations of motion.
     Additionally 3D plots the trajectories of the particle. 
+    IN SI UNITS!
 """
 import numpy as np
 import unittest
@@ -68,6 +69,10 @@ def solver(X, t0, Efield, Bfield, mass_of_particle):
             Array of calculated acceleration and velocity of particle, by components. Used for the integration
             over all the time points.
     """
+    x = X[0]
+    y = X[1]
+    z = X[2]
+
     vx = X[3]
     vy = X[4]
     vz = X[5]
@@ -77,7 +82,7 @@ def solver(X, t0, Efield, Bfield, mass_of_particle):
     az = ELECTRON_CHARGE*(Efield[2]+(vx*Bfield[1])-(vy*Bfield[0]))/mass_of_particle
     return [vx, vy, vz, ax, ay, az ]
 
-def motion_not_parallel(v_init, p_init, B_field=[0, 0, 0.1], E_field=[0, 0, 0], ticks=100, t_length=1e-8, particle_type='electron'):
+def motion_not_parallel(v_init, p_init, B_field=[0, 0, 0.1], E_field=[0, 0, 0], ticks=2100, t_length=1e-8, particle_type='electron'):
     """
     PURPOSE:
     --------
@@ -125,6 +130,7 @@ def motion_not_parallel(v_init, p_init, B_field=[0, 0, 0.1], E_field=[0, 0, 0], 
     gyro_diameter = (2*(mass_of_particle*velocity_mag)/(ELECTRON_CHARGE*B_field[2]))
     tick_length = gyro_diameter/ticks
     time_step = tick_length/velocity_mag
+    print time_step
 
     t = np.arange(0, t_length, time_step/2)
     pv0 = [p_init[0], p_init[1], p_init[2], v_init[0], v_init[1], v_init[2]]
@@ -197,7 +203,7 @@ def motion_parallel(params):
     pv = integrate.odeint(solver, pv0, t, args=(E_field, B_field, mass_of_particle))
     return pv 
 
-def run_particles(num_samples, t_length, B_field=[0, 0, 0.1], E_field=[0, 0, 0], ticks=100, particle_type='electron'):
+def run_particles(num_samples, t_length, Bfield=[0, 0, 0.1], Efield=[0, 0, 0], ticks=2100, particle_type='electron'):
     """
     PURPOSE:
     --------
@@ -218,10 +224,10 @@ def run_particles(num_samples, t_length, B_field=[0, 0, 0.1], E_field=[0, 0, 0],
         t_length: float (optional)
             The duration the particle travels in this simulated grid
 
-        B_field: array (optional)
+        Bfield: array (optional)
             The magnetic field. [Bx, By, Bz]
 
-        E_field: array (optional)
+        Efield: array (optional)
             The electric field. [Ex, Ey, Ez]
 
         ticks: integer (optional)
@@ -241,10 +247,10 @@ def run_particles(num_samples, t_length, B_field=[0, 0, 0.1], E_field=[0, 0, 0],
     pos = rg.get_random_points(len(x_vals), 0, 1, 3)
     vel[0] = [3e5, 3e5, 3e5]
     pos[0] = [0, 0, 0]
-    B_fields = np.full((len(vel), 3), B_field)
-    E_fields = np.full((len(vel), 3), E_field)
+    Bfields = np.full((len(vel), 3), Bfield)
+    Efields = np.full((len(vel), 3), Efield)
     grid_params = np.full((len(vel), 3), [ticks, t_length, particle_type])
-    params = zip(vel, pos, B_fields, E_fields, grid_params)
+    params = zip(vel, pos, Bfields, Efields, grid_params)
     p = multiprocessing.Pool()
     result = p.map(motion_parallel, params)
 
@@ -303,7 +309,7 @@ def test_ticks(ticks=100):
     pv2 = motion_not_parallel([1e5, 1e5, 1e5], [0, 0, 0], ticks=next_tick)
     test_val_vel = [np.abs(((pv1[10, 3] - pv2[10, 3])/pv2[10, 3]))*100, np.abs(((pv1[10, 4] - pv2[10, 3])/pv2[10, 4]))*100, np.abs(((pv1[10, 5] - pv2[10, 5])/pv2[10, 5]))*100]
     test_val_pos = [np.abs(((pv1[10, 0] - pv2[10, 0])/pv2[10, 0]))*100, np.abs(((pv1[10, 1] - pv2[10, 1])/pv2[10, 1]))*100, np.abs(((pv1[10, 2] - pv2[10, 2])/pv2[10, 2]))*100]
-    if test_val_vel[0] <= 1 and test_val_vel[1] <= 1 and test_val_vel[2] <= 1: #and test_val_pos[0] <= 1 and test_val_pos[1] <= 1 and test_val_pos[2] <= 1:
+    if test_val_vel[0] <= 1 and test_val_vel[1] <= 1 and test_val_vel[2] <= 1:
         print "NEW TICK VALUE: "+str(next_tick)
     else:
         print next_tick
@@ -326,14 +332,10 @@ def test_energy(result):
     OUTPUTS:
     --------
         energy: 1d array
-            Total energy of the particle at each sampled point in its tragectory. 
+            Total energy of the particle at each sampled point in its tragectory in eV. 
     """
     for value in result:
         vel = np.sqrt(value[:, 3]**2 + value[:, 4]**2 + value[:, 5]**2)
-        energy = (0.5)*E_MASS_G*vel**2
+        energy = ((0.5)*E_MASS_G*vel**2)*6.242e+18
         print "Percent Diff of Vi and Vf: "+str(np.abs(energy[0] - energy[-1])*100/energy[0])
     return energy
-
-
-
-
