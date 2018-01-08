@@ -1,6 +1,6 @@
 """
 Collisions module
-IN CGS UNITS!
+(INTEGRATION EQUATIONS IN CGS UNITS!)
 """
 import math
 import numpy as np
@@ -82,6 +82,95 @@ def change_in_vel(t, y):
 
     return dV_dt
 
+def internal_velocity_function(velocity_parallel, t_start, num_steps, dt):
+        """
+    PURPOSE 
+    -------
+        This function is an internal function to the function "collisions." This function uses integration
+        solver to solve for the changes in parallel velocity.
+
+    INPUTS
+    ------
+        velocity_parallel : float
+            The initial parallel velocity calculated in the function "collisions"
+
+        t_start : float
+            Start time
+
+        num_steps : float
+            Number of time num_steps
+
+        dt : float
+            The change of time in each step
+
+    OUTPUTS
+    -------
+        V_par : array
+            The parallel velocity of the particle at each instant in time t
+
+        t : array
+            The time array
+    """
+    r = integrate.ode(change_in_vel).set_integrator('vode', method='bdf')
+    r.set_initial_value([velocity_parallel.value], t_start)
+    t = np.zeros((num_steps, 1))
+    V_par = np.zeros((num_steps, 1))
+    t[0] = t_start
+    V_par[0] = velocity_parallel.value
+
+    k = 1
+    while r.successful() and k < num_steps:
+        r.integrate(r.t + dt)
+        t[k] = r.t
+        V_par[k] = r.y[0]
+        k += 1
+    return V_par, t
+
+
+def internal_energy_function(e0_erg, t_start, num_steps, dt):
+         """
+    PURPOSE 
+    -------
+        This function is an internal function to the function "collisions." This function uses integration
+        solver to solve for the changes in energy.
+
+    INPUTS
+    ------
+        e0_erg : float
+            The initial energy of the particle
+
+        t_start : float
+            Start time
+
+        num_steps : float
+            Number of time num_steps
+
+        dt : float
+            The change of time in each step
+
+    OUTPUTS
+    -------
+        E : array
+            The energy of the particle at each instant in time tx
+    """
+    r = integrate.ode(change_in_energy).set_integrator('vode', method='bdf')
+    r.set_initial_value([e0_erg.value], t_start)
+    t = np.zeros((num_steps, 1))
+    E = np.zeros((num_steps, 1))
+    t[0] = t_start
+    E[0] = e0_erg.value * 6.242e8
+
+    k = 1
+    while r.successful() and k < num_steps:
+        r.integrate(r.t + dt)
+        t[k] = r.t
+        if r.y[0] * 6.242e8 > 0:
+            E[k] = r.y[0] * 6.242e8
+        else:
+            break 
+        k += 1
+    return E
+
 
 def collisions(energy, ne=1e9*u.cm**-3, ni=1e9*u.cm**-3, Te=2e6*u.K, Ti=2e6*u.K):
     """
@@ -137,38 +226,12 @@ def collisions(energy, ne=1e9*u.cm**-3, ni=1e9*u.cm**-3, Te=2e6*u.K, Ti=2e6*u.K)
     dt = 1e3
     num_steps = int(np.floor((t_end - t_start)/dt) + 1)
 
-    r1 = integrate.ode(change_in_energy).set_integrator('vode', method='bdf')
-    r1.set_initial_value([e0_erg.value], t_start)
-    t = np.zeros((num_steps, 1))
-    E = np.zeros((num_steps, 1))
-    t[0] = t_start
-    E[0] = e0_erg.value * 6.242e8
+    E = internal_energy_function(e0_erg, t_start, num_steps, dt)
+    V_par, t = internal_velocity_function(velocity_parallel, t_start, num_steps, dt)
 
-    k = 1
-    while r1.successful() and k < num_steps:
-        r1.integrate(r1.t + dt)
-        t[k] = r1.t
-        if r1.y[0] * 6.242e8 > 0:
-            E[k] = r1.y[0] * 6.242e8
-        else:
-            break 
-        k += 1
-
-    r2 = integrate.ode(change_in_vel).set_integrator('vode', method='bdf')
-    r2.set_initial_value([velocity_parallel.value], t_start)
-    V_par = np.zeros((num_steps, 1))
-    V_par[0] = velocity_parallel.value
-
-    j = 1
-    while r2.successful() and j < num_steps:
-        r2.integrate(r2.t + dt)
-        V_par[k] = r2.y[0]
-        j += 1
-
-    #E_flattened = np.ndarray.flatten(E)
-    #idx = np.argwhere(E_flattened == 0)[0][0]
     plt.figure()
     plt.subplot(211)
+    plt.title('Changes Due Collisions')
     plt.plot(t, E)
     plt.xlabel('Time (s)')
     plt.ylabel('Energy (keV)')
@@ -178,4 +241,5 @@ def collisions(energy, ne=1e9*u.cm**-3, ni=1e9*u.cm**-3, Te=2e6*u.K, Ti=2e6*u.K)
     plt.ylabel('Velocity (cm/s)')
     plt.tight_layout()
     plt.show()
+
     return E, V_par
