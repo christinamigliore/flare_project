@@ -72,18 +72,18 @@ def change_in_vel(t, y):
     """
     coulomb_log = 20.825
     density = 1e9
-    vz = 10828409511.3
+    vx, vy = 10828409511.3, 10828409511.3
 
-    velocity_parallel = y[0]
+    vz = y[0]
 
     n = len(y) 
     dV_dt = np.zeros((n,1))
-    dV_dt[0] = ((-1*np.pi*(E_CHARGE**4)*coulomb_log)/((0.5*E_MASS_G*(velocity_parallel**2 + vz**2))*2))*(1 + (E_MASS_G/P_MASS_G))*(velocity_parallel**2 + vz**2)
+    dV_dt[0] = ((-1*np.pi*(E_CHARGE**4)*coulomb_log)/((0.5*E_MASS_G*(vx**2 + vy**2+ vz**2))*2))*(1 + (E_MASS_G/P_MASS_G))*(vx**2 + vy**2 + vz**2)
 
     return dV_dt
 
-def internal_velocity_function(velocity_parallel, t_start, num_steps, dt):
-        """
+def internal_velocity_function(vz, t_start, num_steps, dt):
+    """
     PURPOSE 
     -------
         This function is an internal function to the function "collisions." This function uses integration
@@ -91,7 +91,7 @@ def internal_velocity_function(velocity_parallel, t_start, num_steps, dt):
 
     INPUTS
     ------
-        velocity_parallel : float
+        vz : float
             The initial parallel velocity calculated in the function "collisions"
 
         t_start : float
@@ -112,11 +112,11 @@ def internal_velocity_function(velocity_parallel, t_start, num_steps, dt):
             The time array
     """
     r = integrate.ode(change_in_vel).set_integrator('vode', method='bdf')
-    r.set_initial_value([velocity_parallel.value], t_start)
+    r.set_initial_value([vz.value], t_start)
     t = np.zeros((num_steps, 1))
     V_par = np.zeros((num_steps, 1))
     t[0] = t_start
-    V_par[0] = velocity_parallel.value
+    V_par[0] = vz.value
 
     k = 1
     while r.successful() and k < num_steps:
@@ -128,7 +128,7 @@ def internal_velocity_function(velocity_parallel, t_start, num_steps, dt):
 
 
 def internal_energy_function(e0_erg, t_start, num_steps, dt):
-         """
+    """
     PURPOSE 
     -------
         This function is an internal function to the function "collisions." This function uses integration
@@ -172,7 +172,7 @@ def internal_energy_function(e0_erg, t_start, num_steps, dt):
     return E
 
 
-def collisions(energy, ne=1e9*u.cm**-3, ni=1e9*u.cm**-3, Te=2e6*u.K, Ti=2e6*u.K):
+def collisions(energy, vx, vy, vz, ne=1e9*u.cm**-3, ni=1e9*u.cm**-3, Te=2e6*u.K, Ti=2e6*u.K, t_start=0.0, t_end=250000.0, dt=1e3):
     """
     PURPOSE
     -------
@@ -183,6 +183,19 @@ def collisions(energy, ne=1e9*u.cm**-3, ni=1e9*u.cm**-3, Te=2e6*u.K, Ti=2e6*u.K)
     ------
         energy : float * astropy unit
             Initial energy of particle (can be in any units)
+            Must include astropy unit!
+
+        vx : float * astropy unit
+            The x component of the particle's velocity (can be in any units)
+            Must include astropy unit!
+
+        vy : float * astropy unit
+            The y component of the particle's velocity (can be in any units)
+            Must include astropy unit!
+
+        vz : float * astropy unit
+            The z component of the particle's velocity (can be in any units)
+            Must include astropy unit!
 
         ne : float (optional)
             Electron number density
@@ -196,6 +209,15 @@ def collisions(energy, ne=1e9*u.cm**-3, ni=1e9*u.cm**-3, Te=2e6*u.K, Ti=2e6*u.K)
         Ti : float (optional)
             Ion temperature
 
+        t_start : float (optional)
+            Start time of simulation
+
+        t_end : float (optional)
+            End time of simulation
+
+        dt : float (optional)
+            The time step
+
     OUTPUTS
     -------
         E : array
@@ -206,14 +228,13 @@ def collisions(energy, ne=1e9*u.cm**-3, ni=1e9*u.cm**-3, Te=2e6*u.K, Ti=2e6*u.K)
 
     """
     energy_J = energy.to((u.kg*u.m**2)/u.s**2)
-    velocity_mag = np.sqrt(2*energy_J/E_MASS_G.to(u.kg))
-    vx, vy, vz = np.sqrt((velocity_mag**2)/3), np.sqrt((velocity_mag**2)/3), np.sqrt((velocity_mag**2)/3)
+    #velocity_mag = np.sqrt(2*energy_J/E_MASS_G.to(u.kg))
+    #velocity_mag = velocity_mag.to(u.cm/u.s)
+    #vx, vy, vz = np.sqrt((velocity_mag**2)/3), np.sqrt((velocity_mag**2)/3), np.sqrt((velocity_mag**2)/3)
     vx = vx.to(u.cm/u.s)
     vy = vy.to(u.cm/u.s)
     vz = vz.to(u.cm/u.s)
-    velocity_mag = velocity_mag.to(u.cm/u.s)
     e0_erg = energy_J.to(u.erg)
-    velocity_parallel = np.sqrt(vy**2 + vz**2)
     print('PARAMETERS:')
     print("-----------------------------")
     print("Energy in keV: "+str(e0_erg.value*6.242e8))
@@ -221,13 +242,10 @@ def collisions(energy, ne=1e9*u.cm**-3, ni=1e9*u.cm**-3, Te=2e6*u.K, Ti=2e6*u.K)
     coulomb_log = cd.calculate_coulomb_log(electron_nd=ne, ion_nd=ni, Te=Te, Ti=Ti)
     print("Coulomb log: "+str(coulomb_log))
 
-    t_start = 0.0
-    t_end = 250000.0
-    dt = 1e3
     num_steps = int(np.floor((t_end - t_start)/dt) + 1)
 
     E = internal_energy_function(e0_erg, t_start, num_steps, dt)
-    V_par, t = internal_velocity_function(velocity_parallel, t_start, num_steps, dt)
+    V_par, t = internal_velocity_function(vz, t_start, num_steps, dt)
 
     plt.figure()
     plt.subplot(211)
